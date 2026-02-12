@@ -1,14 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@sentry/nuxt/module', '@nuxt/eslint'],
+  compatibilityDate: '2024-10-24',
   ssr: false,
-  devtools: {
-    enabled: true,
-
-    timeline: {
-      enabled: true,
-    },
-  },
+  modules: ['@sentry/nuxt/module', '@nuxt/eslint'],
   app: {
     head: {
       meta: [
@@ -29,8 +23,17 @@ export default defineNuxtConfig({
   css: [
     '~/assets/scss/main.scss',
   ],
-  sourcemap: { client: 'hidden' },
-  compatibilityDate: '2024-10-24',
+  devtools: {
+    enabled: true,
+    timeline: {
+      enabled: true,
+    },
+  },
+  eslint: {
+    config: {
+      stylistic: true,
+    },
+  },
   nitro: {
     // deal with CORS issues during development
     devProxy: {
@@ -44,11 +47,6 @@ export default defineNuxtConfig({
       },
     },
   },
-  eslint: {
-    config: {
-      stylistic: true,
-    },
-  },
   sentry: {
     org: 'taskar-center-at-uw',
     project: 'workspaces-frontend',
@@ -56,5 +54,5 @@ export default defineNuxtConfig({
     debug: (process.env.ENV === 'dev' || process.env.ENV === 'local'),
     environment: process.env.ENV || 'unknown',
   },
-
+  sourcemap: { client: 'hidden' },
 })
