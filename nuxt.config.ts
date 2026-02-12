@@ -1,8 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-10-24',
-  ssr: false,
   modules: ['@sentry/nuxt/module', '@nuxt/eslint'],
+  ssr: false,
   app: {
     head: {
       meta: [
