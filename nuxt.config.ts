@@ -2,7 +2,13 @@
 export default defineNuxtConfig({
   modules: ['@sentry/nuxt/module', '@nuxt/eslint'],
   ssr: false,
-  devtools: { enabled: process.env.ENV === 'dev' || process.env.ENV === 'local' },
+  devtools: {
+    enabled: true,
+
+    timeline: {
+      enabled: true,
+    },
+  },
   app: {
     head: {
       meta: [
@@ -28,8 +34,14 @@ export default defineNuxtConfig({
   nitro: {
     // deal with CORS issues during development
     devProxy: {
-      '/api': 'http://localhost:8000/api/',
-      '/workspaces': 'http://localhost:8000/workspaces/',
+      '/api': {
+        target: 'http://localhost:8000/api',
+        changeOrigin: true,
+      },
+      '/workspaces': {
+        target: 'http://localhost:8000/workspaces',
+        changeOrigin: true,
+      },
     },
   },
   eslint: {
@@ -44,4 +56,5 @@ export default defineNuxtConfig({
     debug: (process.env.ENV === 'dev' || process.env.ENV === 'local'),
     environment: process.env.ENV || 'unknown',
   },
+
 })
