@@ -12,7 +12,8 @@ Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introdu
 export VITE_TDEI_API_URL=https://api-dev.tdei.us/api/v1/
 export VITE_TDEI_USER_API_URL=https://portal-api-dev.tdei.us/api/v1/
 
-# this accesses the devProxy set in nuxtConfig.ts, change the proxy destination URLs there
+# probably want to leave these as-is
+# this accesses the devProxy set in nuxtConfig.ts, change the proxy destination URLs that proxy hits there
 export VITE_API_URL=http://localhost:3000/api/v1/
 export VITE_OSM_URL=http://localhost:3000/
 
