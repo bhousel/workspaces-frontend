@@ -2,15 +2,16 @@ import { tdeiClient } from '~/services/index'
 
 const ALLOW_ANONYMOUS = new Set([
   '/',
-  '/signin',
-])
+  '/help',
+  '/signin'
+]);
 
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware((to, from) => {
   if (tdeiClient.auth.ok || ALLOW_ANONYMOUS.has(to.path)) {
-    return
+    return;
   }
 
-  window.rememberRoute = to
+  window.rememberRoute = to;
 
-  return navigateTo('/signin')
+  return navigateTo('/signin');
 })

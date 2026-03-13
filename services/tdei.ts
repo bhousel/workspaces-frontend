@@ -2,6 +2,7 @@ import { BlobReader, BlobWriter, ZipReader } from '@zip.js/zip.js';
 
 import { BaseHttpClient, BaseHttpClientError } from '~/services/http';
 import type { ICancelableClient } from '~/services/loading';
+import type { TdeiFeedback } from '~/types/tdei.ts';
 
 const MIN_TOKEN_REFRESH_MS = 10 * 1000;
 
@@ -169,22 +170,29 @@ export class TdeiClient extends BaseHttpClient implements ICancelableClient {
   }
 
   async refreshToken() {
-    const response = await super._post('refresh-token', this.#auth.refreshToken);
-
-    if (response.status === 401) {
-      this.#auth.clear();
+    try {
+      const response = await super._send('refresh-token', 'POST', this.#auth.refreshToken);
+      this.#setAuth(this.#auth.username, await response.json());
+    } catch (e: unknown) {
+      if (e instanceof BaseHttpClientError && e.response.status === 401) {
+        this.#auth.clear();
+      }
     }
-
-    this.#setAuth(this.#auth.username, await response.json());
   }
 
   async tryRefreshAuth() {
-    if (this.#auth.needsRefresh) {
-      await this.refreshToken();
-      return true
+    if (!this.#auth.needsRefresh) {
+      return false;
     }
 
-    return false
+    try {
+      await this.refreshToken();
+    } catch(e: unknown) {
+      console.warn('Exception when refreshing TDEI access token', e);
+      return false;
+    }
+
+    return true;
   }
 
   restartAutoAuthRefresh() {
@@ -334,6 +342,39 @@ export class TdeiClient extends BaseHttpClient implements ICancelableClient {
     const fileResponse = await this._sendTest(`job/download/${jobId}`, 'GET');
 
     return await fileResponse.blob();
+  }
+
+  async getDatasetFeedback(
+    tdeiDatasetId: string,
+    showResolved: boolean = false,
+  ): Promise<TdeiFeedback[]> {
+    const feedback = [];
+    const pageSize = 50;
+    const pageNum = 1;
+    let items;
+
+    const params = new URLSearchParams();
+    params.append('tdei_dataset_id', tdeiDatasetId);
+    params.append('page_size', pageSize.toString());
+
+    if (!showResolved) {
+      params.append('status', 'open');
+    }
+
+    do {
+      params.set('page_no', pageNum.toString());
+      const response = await this._get(`osw/dataset-viewer/feedbacks?${params}`);
+      items = (await response.json()) ?? [];
+
+      for (const submission of items) {
+        submission.created_at = new Date(submission.created_at);
+        submission.updated_at = new Date(submission.updated_at);
+        submission.due_date = new Date(submission.due_date);
+        feedback.push(submission);
+      }
+    } while (items.length === pageSize);
+
+    return feedback;
   }
 
   #setAuth(username: string, body: any) {
